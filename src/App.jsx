@@ -560,7 +560,7 @@ export default function CVPortfolioGlass() {
                       <Github className="h-4 w-4" />
                     </a>
                     <a
-                      href="https://www.linkedin.com/in/elia-stellati/"
+                      href="https://www.linkedin.com/in/elia-stellati/" target="_blank"
                       className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/70 hover:text-white hover:border-white/20 transition"
                       aria-label="LinkedIn"
                     >
