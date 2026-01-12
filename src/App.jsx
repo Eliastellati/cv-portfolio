@@ -560,7 +560,7 @@ export default function CVPortfolioGlass() {
                       <Github className="h-4 w-4" />
                     </a>
                     <a
-                      href="#"
+                      href="https://www.linkedin.com/in/elia-stellati/"
                       className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/70 hover:text-white hover:border-white/20 transition"
                       aria-label="LinkedIn"
                     >
@@ -871,7 +871,7 @@ export default function CVPortfolioGlass() {
               Run demo <ArrowRight className="h-4 w-4" />
             </button>
             <div className="text-xs text-white/50">
-              No data is sent anywhere in this demo.
+              Input is sent to a demo API endpoint (no personal data stored)
             </div>
           </div>
           <label className="block">
