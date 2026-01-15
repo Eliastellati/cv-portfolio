@@ -1,6 +1,7 @@
 
 
 
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,ital@9..144,600,1&display=swap");
 
 
 :root {
@@ -94,4 +95,10 @@ body {
   max-width: none !important;
   margin: 0 !important;
   padding: 0 !important;
+}
+
+body {
+  display: block;
+  place-items: unset;
+  min-height: 100vh;
 }
