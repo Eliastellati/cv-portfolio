@@ -372,6 +372,14 @@ export default function CVPortfolioGlass() {
   const [toolInput, setToolInput] = useState("");
   const [toolOutput, setToolOutput] = useState("");
 
+  const TOOL_ENDPOINTS = {
+  "lead-scorer": "/api/lead-qualifier",
+  // in futuro:
+  // "content-brief": "/api/content-brief",
+  // "doc-bot": "/api/doc-bot",
+};
+
+
   const tools = useMemo(
     () => [
       {
