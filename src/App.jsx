@@ -541,7 +541,8 @@ export default function CVPortfolioGlass() {
       });
 
       const data = await res.json();
-      setToolOutput(JSON.stringify(data, null, 2));
+setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
+
     } catch (e) {
       setToolOutput(`Error: ${String(e)}`);
     }
