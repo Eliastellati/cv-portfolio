@@ -523,13 +523,18 @@ export default function CVPortfolioGlass() {
         ? "/api/content-brief"
         : "/api/doc-bot";
 
+        if (!String(trimmed ?? "").trim()) {
+  setToolOutput("Scrivi una keyword prima di inviare.");
+  return;
+}
+
+
     try {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          input: trimmed,
-          tool: toolModal?.id,
+        input: String(trimmed ?? "").trim(),
         }),
       });
 
