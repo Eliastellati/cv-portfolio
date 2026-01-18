@@ -403,7 +403,7 @@ export default function CVPortfolioGlass() {
   const TOOL_ENDPOINTS = {
   "lead-scorer": "/api/lead-qualifier",
   // in futuro:
-  // "content-brief": "/api/content-brief",
+   "content-brief": "/api/content-brief",
   // "doc-bot": "/api/doc-bot",
 };
 
