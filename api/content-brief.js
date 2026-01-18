@@ -8,8 +8,9 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const N8N_CHAT_URL =
-    "https://illy-slangy-lachelle.ngrok-free.dev/webhook/858ae4fe-d2b9-43e4-bfc7-8ca6ef9f6cde/chat";
+ const N8N_CHAT_URL =
+  "https://illy-slangy-lachelle.ngrok-free.dev/webhook/content-brief";
+
 
   try {
     const upstream = await fetch(N8N_CHAT_URL, {
