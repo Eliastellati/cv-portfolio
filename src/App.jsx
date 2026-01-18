@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { motion } from "framer-motion";
 import { ShaderGradientCanvas, ShaderGradient } from "@shadergradient/react";
@@ -1093,11 +1095,35 @@ export default function CVPortfolioGlass() {
           </div>
 
           <label className="grid gap-2">
-            <span className="text-sm text-white/70">Output</span>
-            <pre className="max-h-72 overflow-auto rounded-xl border border-white/10 bg-black/40 p-4 text-xs text-white/80">
-              {toolOutput || "Output will appear here."}
-            </pre>
-          </label>
+  <span className="text-sm text-white/70">Output</span>
+
+  <div className="max-h-72 overflow-auto rounded-xl border border-white/10 bg-black/40 p-4 text-xs text-white/80">
+    {!toolOutput ? (
+      <div className="text-white/40">Output will appear here.</div>
+    ) : toolModal?.id === "content-brief" ? (
+      <div className="text-sm leading-6">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            h1: (p) => <h1 className="mb-3 text-lg font-semibold" {...p} />,
+            h2: (p) => <h2 className="mt-4 mb-2 text-base font-semibold" {...p} />,
+            ul: (p) => <ul className="ml-5 list-disc space-y-1" {...p} />,
+            li: (p) => <li {...p} />,
+            strong: (p) => <strong className="font-semibold text-white" {...p} />,
+            code: (p) => (
+              <code className="rounded bg-white/10 px-1 py-0.5" {...p} />
+            ),
+          }}
+        >
+          {toolOutput}
+        </ReactMarkdown>
+      </div>
+    ) : (
+      <pre className="whitespace-pre-wrap">{toolOutput}</pre>
+    )}
+  </div>
+</label>
+
         </div>
       </Modal>
 
