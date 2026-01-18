@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
 import { motion } from "framer-motion";
 import { ShaderGradientCanvas, ShaderGradient } from "@shadergradient/react";
 import {
@@ -371,6 +372,33 @@ export default function CVPortfolioGlass() {
   const [toolModal, setToolModal] = useState(null);
   const [toolInput, setToolInput] = useState("");
   const [toolOutput, setToolOutput] = useState("");
+
+  useEffect(() => {
+  // 1) carica CSS della chat
+  const css = document.createElement("link");
+  css.rel = "stylesheet";
+  css.href = "https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css";
+  document.head.appendChild(css);
+
+  // 2) carica la libreria e crea la chat
+  let cleanup = null;
+
+  import("https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js")
+    .then(({ createChat }) => {
+      cleanup = createChat({
+        webhookUrl:
+          "https://illy-slangy-lachelle.ngrok-free.dev/webhook/858ae4fe-d2b9-43e4-bfc7-8ca6ef9f6cde/chat",
+      });
+    })
+    .catch(console.error);
+
+  // cleanup (se supportato)
+  return () => {
+    css.remove();
+    if (typeof cleanup === "function") cleanup();
+  };
+}, []);
+
 
   const TOOL_ENDPOINTS = {
   "lead-scorer": "/api/lead-qualifier",
