@@ -429,12 +429,12 @@ export default function CVPortfolioGlass() {
         placeholder: "e.g. 'AI automation for small businesses'",
       },
       {
-        id: "doc-bot",
-        name: "Doc Bot",
-        icon: Bot,
-        demo:
-          "Summarize a long text and extract action items (placeholder).",
-        placeholder: "Paste a long memo or meeting notes…",
+         id: "gdpr-assistant", // 👈 NUOVO
+      name: "GDPR Assistant",
+      icon: ShieldCheck,
+      demo: "Ask questions about GDPR compliance. Powered by RAG + Claude AI.",
+      placeholder: "e.g. 'What are personal data under GDPR?'",
+      isChat: true, // 👈 Flag per mostrare UI diversa
       },
     ],
     []
@@ -513,40 +513,44 @@ export default function CVPortfolioGlass() {
   ];
 
   const handleFakeToolRun = async () => {
-    const trimmed = toolInput.trim();
-    if (!trimmed) return;
+  const trimmed = toolInput.trim();
+  if (!trimmed) {
+    setToolOutput("Please enter a question first.");
+    return;
+  }
 
-    setToolOutput("Loading...");
+  setToolOutput("Loading...");
 
-    const endpoint =
-      toolModal?.id === "lead-scorer"
-        ? "/api/lead-qualifier"
-        : toolModal?.id === "content-brief"
-        ? "/api/content-brief"
-        : "/api/doc-bot";
-
-        if (!String(trimmed ?? "").trim()) {
-  setToolOutput("Scrivi una keyword prima di inviare.");
-  return;
-}
-
-
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-        input: String(trimmed ?? "").trim(),
-        }),
-      });
-
-      const data = await res.json();
-setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
-
-    } catch (e) {
-      setToolOutput(`Error: ${String(e)}`);
-    }
+  // 👇 Mappa tool ID → endpoint
+  const endpointMap = {
+    "lead-scorer": "/api/lead-qualifier",
+    "content-brief": "/api/content-brief",
+    "gdpr-assistant": "/api/gdpr-chat", // 👈 NUOVO
   };
+
+  const endpoint = endpointMap[toolModal?.id] || "/api/doc-bot";
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: trimmed }),
+    });
+
+    const data = await res.json();
+
+    // 👇 Per GDPR, formatta la risposta con fonti
+    if (toolModal?.id === "gdpr-assistant" && data.sources) {
+      setToolOutput(
+        `${data.text}\n\n📚 **Sources**: ${data.sources.map(s => `Article ${s}`).join(", ")}`
+      );
+    } else {
+      setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
+    }
+  } catch (e) {
+    setToolOutput(`Error: ${String(e)}`);
+  }
+};
 
   return (
     <div className="relative min-h-screen bg-transparent text-white">
@@ -1064,69 +1068,173 @@ setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
       </div>
 
       {/* Tool modal */}
-      <Modal
-        open={!!toolModal}
-        title={toolModal?.name}
-        onClose={() => setToolModal(null)}
-      >
-        <div className="space-y-4">
-          <div className="text-sm text-white/70">{toolModal?.demo}</div>
-          <TextArea
-            label="Input"
-            value={toolInput}
-            onChange={(e) => setToolInput(e.target.value)}
-            placeholder={toolModal?.placeholder}
-          />
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <button
-              onClick={handleFakeToolRun}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition"
-            >
-              Run <Play className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => {
-                setToolInput("");
-                setToolOutput("");
-              }}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-white/20 transition"
-            >
-              Clear <Pause className="h-4 w-4" />
-            </button>
+      {/* Tool modal */}
+<Modal
+  open={!!toolModal}
+  title={toolModal?.name}
+  onClose={() => {
+    setToolModal(null);
+    setToolInput("");
+    setToolOutput("");
+  }}
+>
+  {toolModal?.isChat ? (
+    // ===== GDPR CHAT UI =====
+    <div className="space-y-4">
+      <div className="text-sm text-white/70">{toolModal?.demo}</div>
+
+      {/* Chat history */}
+      <div className="max-h-96 overflow-y-auto space-y-3 rounded-xl border border-white/10 bg-black/40 p-4">
+        {!toolOutput ? (
+          <div className="text-sm text-white/40">
+            💬 Ask a question about GDPR to get started.
           </div>
+        ) : (
+          <div className="space-y-3">
+            {/* User message */}
+            <div className="flex justify-end">
+              <div className="max-w-[80%] rounded-xl bg-[#ff6a00]/20 border border-[#ff6a00]/30 px-4 py-2 text-sm">
+                {toolInput}
+              </div>
+            </div>
 
-          <label className="grid gap-2">
-  <span className="text-sm text-white/70">Output</span>
+            {/* Bot response */}
+            <div className="flex justify-start">
+              <div className="max-w-[85%] rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm leading-relaxed">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: (p) => <h1 className="mb-2 text-base font-semibold" {...p} />,
+                    h2: (p) => <h2 className="mt-3 mb-1 text-sm font-semibold" {...p} />,
+                    ul: (p) => <ul className="ml-4 list-disc space-y-1 my-2" {...p} />,
+                    li: (p) => <li {...p} />,
+                    strong: (p) => <strong className="font-semibold text-white" {...p} />,
+                    code: (p) => (
+                      <code className="rounded bg-white/10 px-1 py-0.5" {...p} />
+                    ),
+                  }}
+                >
+                  {toolOutput}
+                </ReactMarkdown>
 
-  <div className="max-h-72 overflow-auto rounded-xl border border-white/10 bg-black/40 p-4 text-xs text-white/80">
-    {!toolOutput ? (
-      <div className="text-white/40">Output will appear here.</div>
-    ) : toolModal?.id === "content-brief" ? (
-      <div className="text-sm leading-6">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            h1: (p) => <h1 className="mb-3 text-lg font-semibold" {...p} />,
-            h2: (p) => <h2 className="mt-4 mb-2 text-base font-semibold" {...p} />,
-            ul: (p) => <ul className="ml-5 list-disc space-y-1" {...p} />,
-            li: (p) => <li {...p} />,
-            strong: (p) => <strong className="font-semibold text-white" {...p} />,
-            code: (p) => (
-              <code className="rounded bg-white/10 px-1 py-0.5" {...p} />
-            ),
-          }}
-        >
-          {toolOutput}
-        </ReactMarkdown>
+                {/* Sources (se disponibili) */}
+                {toolOutput.includes("📚") && (
+                  <div className="mt-3 pt-3 border-t border-white/10 text-xs text-white/60">
+                    Sources from GDPR Regulation 2016/679
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    ) : (
-      <pre className="whitespace-pre-wrap">{toolOutput}</pre>
-    )}
-  </div>
-</label>
 
+      {/* Input area */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={toolInput}
+          onChange={(e) => setToolInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleFakeToolRun();
+            }
+          }}
+          placeholder={toolModal?.placeholder}
+          className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition"
+        />
+        <button
+          onClick={handleFakeToolRun}
+          disabled={!toolInput.trim()}
+          className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Send <Play className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Suggested questions */}
+      {!toolOutput && (
+        <div className="flex flex-wrap gap-2">
+          <div className="text-xs text-white/50">Try asking:</div>
+          {[
+            "What are personal data?",
+            "What are my rights as a user?",
+            "What are the penalties for violations?",
+          ].map((q) => (
+            <button
+              key={q}
+              onClick={() => {
+                setToolInput(q);
+                setTimeout(handleFakeToolRun, 100);
+              }}
+              className="text-xs rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-white/70 hover:border-[#ff6a00]/30 hover:bg-[#ff6a00]/10 transition"
+            >
+              {q}
+            </button>
+          ))}
         </div>
-      </Modal>
+      )}
+    </div>
+  ) : (
+    // ===== ORIGINAL TOOL UI (Lead Scorer, Content Brief) =====
+    <div className="space-y-4">
+      <div className="text-sm text-white/70">{toolModal?.demo}</div>
+      <TextArea
+        label="Input"
+        value={toolInput}
+        onChange={(e) => setToolInput(e.target.value)}
+        placeholder={toolModal?.placeholder}
+      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <button
+          onClick={handleFakeToolRun}
+          className="inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition"
+        >
+          Run <Play className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => {
+            setToolInput("");
+            setToolOutput("");
+          }}
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-white/20 transition"
+        >
+          Clear <Pause className="h-4 w-4" />
+        </button>
+      </div>
+
+      <label className="grid gap-2">
+        <span className="text-sm text-white/70">Output</span>
+        <div className="max-h-72 overflow-auto rounded-xl border border-white/10 bg-black/40 p-4 text-xs text-white/80">
+          {!toolOutput ? (
+            <div className="text-white/40">Output will appear here.</div>
+          ) : toolModal?.id === "content-brief" ? (
+            <div className="text-sm leading-6">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  h1: (p) => <h1 className="mb-3 text-lg font-semibold" {...p} />,
+                  h2: (p) => <h2 className="mt-4 mb-2 text-base font-semibold" {...p} />,
+                  ul: (p) => <ul className="ml-5 list-disc space-y-1" {...p} />,
+                  li: (p) => <li {...p} />,
+                  strong: (p) => <strong className="font-semibold text-white" {...p} />,
+                  code: (p) => (
+                    <code className="rounded bg-white/10 px-1 py-0.5" {...p} />
+                  ),
+                }}
+              >
+                {toolOutput}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <pre className="whitespace-pre-wrap">{toolOutput}</pre>
+          )}
+        </div>
+      </label>
+    </div>
+  )}
+</Modal>
 
       {/* Small global styles */}
       <style>{`
