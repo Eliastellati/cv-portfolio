@@ -389,7 +389,7 @@ export default function CVPortfolioGlass() {
     .then(({ createChat }) => {
       cleanup = createChat({
         webhookUrl:
-          "https://illy-slangy-lachelle.ngrok-free.dev/webhook/858ae4fe-d2b9-43e4-bfc7-8ca6ef9f6cde/chat",
+          "/api/n8n-chat",
       });
     })
     .catch(console.error);
