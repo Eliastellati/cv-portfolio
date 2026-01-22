@@ -865,7 +865,7 @@ const [isLoading, setIsLoading] = useState(false);
                     }}
                     whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.99 }}
-                    className="text-left"
+                    className="text-left focus:outline-none"
                   >
                     <GlassCard className="h-full">
                       <div className="flex items-start justify-between gap-4">
