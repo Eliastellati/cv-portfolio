@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
+import { useState } from 'react';
+import GdprChatModal from './components/GdprChatModal';
 import { motion } from "framer-motion";
 import { ShaderGradientCanvas, ShaderGradient } from "@shadergradient/react";
 import {
@@ -375,6 +376,8 @@ export default function CVPortfolioGlass() {
   const [toolInput, setToolInput] = useState("");
   const [toolOutput, setToolOutput] = useState("");
 
+  const [sessionId] = useState(() => `session-${Date.now()}`);
+const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
   // 1) carica CSS della chat
   const css = document.createElement("link");
@@ -519,37 +522,54 @@ export default function CVPortfolioGlass() {
     return;
   }
 
-  setToolOutput("Loading...");
+  setIsLoading(true);
 
-  // 👇 Mappa tool ID → endpoint
-  const endpointMap = {
-    "lead-scorer": "/api/lead-qualifier",
-    "content-brief": "/api/content-brief",
-    "gdpr-assistant": "/api/gdpr-chat", // 👈 NUOVO
-  };
+  // Per GDPR Assistant, usa l'API vera
+  if (toolModal?.id === "gdpr-assistant") {
+    try {
+      const res = await fetch("/api/gdpr-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatInput: trimmed,
+          sessionId: sessionId,
+        }),
+      });
 
-  const endpoint = endpointMap[toolModal?.id] || "/api/doc-bot";
+      const data = await res.json();
 
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input: trimmed }),
-    });
-
-    const data = await res.json();
-
-    // 👇 Per GDPR, formatta la risposta con fonti
-    if (toolModal?.id === "gdpr-assistant" && data.sources) {
-      setToolOutput(
-        `${data.text}\n\n📚 **Sources**: ${data.sources.map(s => `Article ${s}`).join(", ")}`
-      );
-    } else {
-      setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
+      if (data.ok && data.response) {
+        setToolOutput(data.response);
+      } else {
+        setToolOutput("❌ Error: " + (data.error || "Unknown error"));
+      }
+    } catch (e) {
+      console.error("GDPR Chat Error:", e);
+      setToolOutput("❌ Connection error. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-  } catch (e) {
-    setToolOutput(`Error: ${String(e)}`);
+    return;
   }
+
+  // Per gli altri tools (Lead Scorer, Content Brief) - mantieni fake
+  await new Promise((r) => setTimeout(r, 800));
+
+  if (toolModal?.id === "lead-scorer") {
+    setToolOutput(
+      JSON.stringify(
+        { score: 87, reason: "Hot lead. Ready to engage." },
+        null,
+        2
+      )
+    );
+  } else if (toolModal?.id === "content-brief") {
+    setToolOutput(
+      `# Content Brief\n\n## Topic\n${trimmed}\n\n## Outline\n- Section 1\n- Section 2`
+    );
+  }
+
+  setIsLoading(false);
 };
 
   return (
@@ -1085,11 +1105,16 @@ export default function CVPortfolioGlass() {
 
       {/* Chat history */}
       <div className="max-h-96 overflow-y-auto space-y-3 rounded-xl border border-white/10 bg-black/40 p-4">
-        {!toolOutput ? (
-          <div className="text-sm text-white/40">
-            💬 Ask a question about GDPR to get started.
-          </div>
-        ) : (
+        {isLoading ? (
+  <div className="flex items-center gap-2 text-sm text-white/70">
+    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-[#ff6a00]"></div>
+    Thinking...
+  </div>
+) : !toolOutput ? (
+  <div className="text-sm text-white/40">
+    💬 Ask a question about GDPR to get started.
+  </div>
+) : (
           <div className="space-y-3">
             {/* User message */}
             <div className="flex justify-end">
@@ -1146,7 +1171,7 @@ export default function CVPortfolioGlass() {
         />
         <button
           onClick={handleFakeToolRun}
-          disabled={!toolInput.trim()}
+          disabled={!toolInput.trim() || isLoading}
           className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Send <Play className="h-4 w-4" />
