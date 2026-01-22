@@ -340,7 +340,7 @@ const Input = ({ label, ...props }) => (
     <span className="text-white/70">{label}</span>
     <input
       {...props}
-      className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-white placeholder:text-white/40 outline-none ring-0 focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
+      className="rounded-xl border border-white/10 bg-black/40 px-4 py-2 text-white placeholder:text-white/40 outline-none ring-0 focus:border-[#ff6a00]/50 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
     />
   </label>
 );
@@ -350,7 +350,7 @@ const TextArea = ({ label, ...props }) => (
     <span className="text-white/70">{label}</span>
     <textarea
       {...props}
-      className="min-h-[120px] resize-y rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-white placeholder:text-white/40 outline-none ring-0 focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
+      className="min-h-[120px] resize-y rounded-xl border border-white/10 bg-black/40 px-4 py-2 text-white placeholder:text-white/40 outline-none ring-0 focus:border-[#ff6a00]/50 focus:bg-black/60 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
     />
   </label>
 );
