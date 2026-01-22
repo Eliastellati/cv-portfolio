@@ -339,7 +339,7 @@ const TextArea = ({ label, ...props }) => (
     <span className="text-white/70">{label}</span>
     <textarea
       {...props}
-      className="min-h-[120px] resize-y rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-white placeholder:text-white/40 outline-none ring-0 focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition"
+      className="min-h-[120px] resize-y rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-white placeholder:text-white/40 outline-none ring-0 focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
     />
   </label>
 );
@@ -615,7 +615,7 @@ const [isLoading, setIsLoading] = useState(false);
 };
 
   return (
-    <div className="relative min-h-screen bg-transparent text-white">
+    <div className="relative min-h-screen bg-black text-white">
       <ShaderBackground />
 
       <div className="relative z-10 overflow-hidden">
@@ -1203,20 +1203,30 @@ const [isLoading, setIsLoading] = useState(false);
           value={toolInput}
           onChange={(e) => setToolInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
+            if (e.key === "Enter" && !e.shiftKey && !isLoading) {
               e.preventDefault();
               handleFakeToolRun();
             }
           }}
+          disabled={isLoading}
           placeholder={toolModal?.placeholder}
-          className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition"
+          className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white placeholder:text-white/40 outline-none focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <button
           onClick={handleFakeToolRun}
           disabled={!toolInput.trim() || isLoading}
           className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Send <Play className="h-4 w-4" />
+          {isLoading ? (
+            <>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-black/20 border-t-black"></div>
+              Sending...
+            </>
+          ) : (
+            <>
+              Send <Play className="h-4 w-4" />
+            </>
+          )}
         </button>
       </div>
 
@@ -1235,7 +1245,8 @@ const [isLoading, setIsLoading] = useState(false);
                 setToolInput(q);
                 setTimeout(handleFakeToolRun, 100);
               }}
-              className="text-xs rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-white/70 hover:border-[#ff6a00]/30 hover:bg-[#ff6a00]/10 transition"
+              disabled={isLoading}
+              className="text-xs rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-white/70 hover:border-[#ff6a00]/30 hover:bg-[#ff6a00]/10 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {q}
             </button>
@@ -1252,20 +1263,32 @@ const [isLoading, setIsLoading] = useState(false);
         value={toolInput}
         onChange={(e) => setToolInput(e.target.value)}
         placeholder={toolModal?.placeholder}
+        disabled={isLoading}
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={handleFakeToolRun}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition"
+          disabled={isLoading || !toolInput.trim()}
+          className="inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Run <Play className="h-4 w-4" />
+          {isLoading ? (
+            <>
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-black/20 border-t-black"></div>
+              Running...
+            </>
+          ) : (
+            <>
+              Run <Play className="h-4 w-4" />
+            </>
+          )}
         </button>
         <button
           onClick={() => {
             setToolInput("");
             setToolOutput("");
           }}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-white/20 transition"
+          disabled={isLoading}
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:border-white/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Clear <Pause className="h-4 w-4" />
         </button>
