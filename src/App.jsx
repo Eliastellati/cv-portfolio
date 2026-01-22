@@ -489,7 +489,7 @@ const [isLoading, setIsLoading] = useState(false);
         "Check updated standings and fixtures",
         "Modern Interface with React and TailwindCSS",
       ],
-      url: "https://football-insight-app-6nyzx.vercel.app/competition/PL",
+      url: "https://football-insight-app-6nyzx.vercel.app",
     },
     {
       title: "AI Project - Ducati spot",
