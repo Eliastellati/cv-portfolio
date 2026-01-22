@@ -513,7 +513,7 @@ const [isLoading, setIsLoading] = useState(false);
     },
   ];
 
-  const handleFakeToolRun = async () => {
+ const handleFakeToolRun = async () => {
   const trimmed = toolInput.trim();
   if (!trimmed) {
     setToolOutput("Please enter a question first.");
@@ -550,17 +550,26 @@ const [isLoading, setIsLoading] = useState(false);
     return;
   }
 
-  // ===== LEAD SCORER - API VERA =====
+  // ===== LEAD SCORER =====
   if (toolModal?.id === "lead-scorer") {
     try {
       const res = await fetch("/api/lead-qualifier", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: trimmed }),
+        body: JSON.stringify({
+          leadDescription: trimmed,  // ← CAMBIATO
+          // Aggiungi altri campi se necessario
+        }),
       });
 
       const data = await res.json();
-      setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
+      
+      // Mostra il risultato formattato
+      if (data.upstreamStatus === 200) {
+        setToolOutput(JSON.stringify(data, null, 2));
+      } else {
+        setToolOutput("❌ Error: " + JSON.stringify(data, null, 2));
+      }
     } catch (e) {
       console.error("Lead Scorer Error:", e);
       setToolOutput("❌ Connection error: " + String(e));
@@ -570,17 +579,26 @@ const [isLoading, setIsLoading] = useState(false);
     return;
   }
 
-  // ===== CONTENT BRIEF - API VERA =====
+  // ===== CONTENT BRIEF =====
   if (toolModal?.id === "content-brief") {
     try {
       const res = await fetch("/api/content-brief", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: trimmed }),
+        body: JSON.stringify({
+          topic: trimmed,  // ← CAMBIATO
+          // Aggiungi altri campi se necessario
+        }),
       });
 
       const data = await res.json();
-      setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
+      
+      // Se la risposta è testo, mostrala; altrimenti JSON
+      if (typeof data === 'string') {
+        setToolOutput(data);
+      } else {
+        setToolOutput(JSON.stringify(data, null, 2));
+      }
     } catch (e) {
       console.error("Content Brief Error:", e);
       setToolOutput("❌ Connection error: " + String(e));
@@ -590,7 +608,7 @@ const [isLoading, setIsLoading] = useState(false);
     return;
   }
 
-  // ===== FALLBACK (altri tools futuri) =====
+  // ===== FALLBACK =====
   await new Promise((r) => setTimeout(r, 800));
   setToolOutput("Tool not configured yet.");
   setIsLoading(false);
