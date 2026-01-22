@@ -340,7 +340,7 @@ const Input = ({ label, ...props }) => (
     <span className="text-white/70">{label}</span>
     <input
       {...props}
-      className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-white placeholder:text-white/40 outline-none ring-0 focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition"
+      className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-white placeholder:text-white/40 outline-none ring-0 focus:border-[#ff6a00]/50 focus:shadow-[0_0_0_4px_rgba(255,106,0,0.12)] transition disabled:opacity-50 disabled:cursor-not-allowed"
     />
   </label>
 );
@@ -385,6 +385,16 @@ export default function CVPortfolioGlass() {
   const [toolInput, setToolInput] = useState("");
   const [toolOutput, setToolOutput] = useState("");
   const [videoModal, setVideoModal] = useState(null);
+
+  // Contact form state
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [contactFormLoading, setContactFormLoading] = useState(false);
+  const [contactFormStatus, setContactFormStatus] = useState(null); // 'success' or 'error'
 
   const [sessionId] = useState(() => `session-${Date.now()}`);
 const [isLoading, setIsLoading] = useState(false);
@@ -630,6 +640,46 @@ const [isLoading, setIsLoading] = useState(false);
   await new Promise((r) => setTimeout(r, 800));
   setToolOutput("Tool not configured yet.");
   setIsLoading(false);
+};
+
+const handleContactFormSubmit = async (e) => {
+  e.preventDefault();
+  setContactFormLoading(true);
+  setContactFormStatus(null);
+
+  try {
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: contactForm.name,
+        email: contactForm.email,
+        subject: contactForm.subject,
+        message: contactForm.message,
+        recipientEmail: "eliastellatibvb@gmail.com",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      setContactFormStatus("success");
+      // Clear form on success
+      setContactForm({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+    } else {
+      setContactFormStatus("error");
+    }
+  } catch (error) {
+    console.error("Contact form error:", error);
+    setContactFormStatus("error");
+  } finally {
+    setContactFormLoading(false);
+  }
 };
 
   return (
@@ -1035,19 +1085,23 @@ const [isLoading, setIsLoading] = useState(false);
                   <div className="text-sm font-semibold">Quick links</div>
                   <div className="mt-4 space-y-3">
                     <a
-                      href="#"
+                      href="https://www.linkedin.com/in/elia-stellati/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 hover:border-white/20 transition"
                     >
                       LinkedIn <ExternalLink className="h-4 w-4" />
                     </a>
                     <a
-                      href="#"
+                      href="https://github.com/Eliastellati"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 hover:border-white/20 transition"
                     >
                       GitHub <ExternalLink className="h-4 w-4" />
                     </a>
                     <a
-                      href="#"
+                      href="mailto:eliastellatibvb@gmail.com"
                       className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 hover:border-white/20 transition"
                     >
                       Email <ExternalLink className="h-4 w-4" />
@@ -1068,48 +1122,76 @@ const [isLoading, setIsLoading] = useState(false);
 
                 <GlassCard className="lg:col-span-2">
                   <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      alert("Form submitted (placeholder). Connect to your backend later.");
-                    }}
+                    onSubmit={handleContactFormSubmit}
                     className="grid gap-4"
                   >
                     <div className="grid gap-4 md:grid-cols-2">
                       <Input
                         label="Name"
-                        placeholder="Elia Stellati"
-                        value={""}
-                        onChange={() => {}}
+                        placeholder="Your name"
+                        value={contactForm.name}
+                        onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                        required
+                        disabled={contactFormLoading}
                       />
                       <Input
                         label="Email"
                         placeholder="you@email.com"
                         type="email"
-                        value={""}
-                        onChange={() => {}}
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                        required
+                        disabled={contactFormLoading}
                       />
                     </div>
                     <Input
                       label="Subject"
                       placeholder="How can we collaborate?"
-                      value={""}
-                      onChange={() => {}}
+                      value={contactForm.subject}
+                      onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                      required
+                      disabled={contactFormLoading}
                     />
                     <TextArea
                       label="Message"
-                      placeholder="Tell me what you’re building and what you need…"
-                      value={""}
-                      onChange={() => {}}
+                      placeholder="Tell me what you're building and what you need…"
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                      required
+                      disabled={contactFormLoading}
                     />
+
+                    {/* Status messages */}
+                    {contactFormStatus === "success" && (
+                      <div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+                        ✓ Message sent successfully! I'll get back to you soon.
+                      </div>
+                    )}
+                    {contactFormStatus === "error" && (
+                      <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                        ✗ Failed to send message. Please try again or email me directly.
+                      </div>
+                    )}
+
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="text-xs text-white/50">
-                        By sending, you agree to be contacted back. (Placeholder text)
+                        By sending, you agree to be contacted back.
                       </div>
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition"
+                        disabled={contactFormLoading}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[#ff6a00] px-4 py-2 text-sm font-semibold text-black hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Send <ArrowRight className="h-4 w-4" />
+                        {contactFormLoading ? (
+                          <>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-black/20 border-t-black"></div>
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            Send <ArrowRight className="h-4 w-4" />
+                          </>
+                        )}
                       </button>
                     </div>
                   </form>
@@ -1131,10 +1213,20 @@ const [isLoading, setIsLoading] = useState(false);
                     <a
                       href="https://www.linkedin.com/in/elia-stellati/"
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/70 hover:text-white hover:border-white/20 transition"
                       aria-label="LinkedIn"
                     >
                       <Linkedin className="h-4 w-4" />
+                    </a>
+                    <a
+                      href="https://github.com/Eliastellati"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-xl border border-white/10 bg-white/5 p-2 text-white/70 hover:text-white hover:border-white/20 transition"
+                      aria-label="GitHub"
+                    >
+                      <Github className="h-4 w-4" />
                     </a>
                     <a
                       href="mailto:eliastellatibvb@gmail.com"
