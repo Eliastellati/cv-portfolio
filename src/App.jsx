@@ -258,7 +258,7 @@ const Chip = ({ children }) => (
   </span>
 );
 
-const ProjectCard = ({ title, desc, tags, bullets, linkLabel = "View" }) => (
+const ProjectCard = ({ title, desc, tags, bullets, linkLabel = "View", url = "#", videoUrl, onVideoClick }) => (
   <GlassCard className="group relative overflow-hidden border-white/15 bg-white/[0.06] p-7 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
 
     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition">
@@ -272,12 +272,23 @@ const ProjectCard = ({ title, desc, tags, bullets, linkLabel = "View" }) => (
           <div className="text-lg font-semibold">{title}</div>
           <p className="mt-2 text-sm text-white/70">{desc}</p>
         </div>
-        <a
-          href="#"
-          className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 backdrop-blur-md hover:border-white/20 transition"
-        >
-          {linkLabel} <ArrowRight className="h-4 w-4" />
-        </a>
+        {videoUrl ? (
+          <button
+            onClick={onVideoClick}
+            className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 backdrop-blur-md hover:border-white/20 transition"
+          >
+            {linkLabel} <Play className="h-4 w-4" />
+          </button>
+        ) : (
+          <a
+            href={url}
+            target={url !== "#" ? "_blank" : undefined}
+            rel={url !== "#" ? "noopener noreferrer" : undefined}
+            className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 backdrop-blur-md hover:border-white/20 transition"
+          >
+            {linkLabel} <ArrowRight className="h-4 w-4" />
+          </a>
+        )}
       </div>
 
       {tags?.length ? (
@@ -373,6 +384,7 @@ export default function CVPortfolioGlass() {
   const [toolModal, setToolModal] = useState(null);
   const [toolInput, setToolInput] = useState("");
   const [toolOutput, setToolOutput] = useState("");
+  const [videoModal, setVideoModal] = useState(null);
 
   const [sessionId] = useState(() => `session-${Date.now()}`);
 const [isLoading, setIsLoading] = useState(false);
@@ -418,7 +430,7 @@ const [isLoading, setIsLoading] = useState(false);
         name: "Lead Qualifier",
         icon: ShieldCheck,
         demo:
-          "Paste a lead description and get a quick score + next steps (placeholder).",
+          "Paste a lead description and get a quick score + next steps.",
         placeholder: "e.g. 'SaaS founder, 10k MRR, wants outbound system…'",
       },
       {
@@ -426,7 +438,7 @@ const [isLoading, setIsLoading] = useState(false);
         name: "Content Brief",
         icon: FileText,
         demo:
-          "Turn a topic into a structured brief: angle, outline, SEO notes (placeholder).",
+          "Turn a topic into a structured brief: angle, outline, SEO notes.",
         placeholder: "e.g. 'AI automation for small businesses'",
       },
       {
@@ -459,34 +471,40 @@ const [isLoading, setIsLoading] = useState(false);
 
   const projects = [
     {
-      title: "Lead Qualification Pipeline",
-      desc: "Score inbound leads, enrich data, route to CRM, and generate a next-step email draft.",
-      tags: ["Automation", "CRM", "LLMs"],
+      title: "Pith Lens - Football App",
+      desc: "A Football app, running only on free resources (demo).",
+      tags: ["Automation", "Backend", "LLMs"],
       bullets: [
-        "Reduced manual triage time by ~70% (placeholder).",
-        "Auto-tags, assigns owner, and generates follow-ups.",
-        "Slack alerts + weekly summary dashboard.",
+        "Navigate the top 5 Leagues",
+        "Check updated standings and fixtures",
+        "Modern Interface with React and TailwindCSS",
       ],
+      url: "https://football-insight-app-6nyzx.vercel.app/competition/PL",
     },
     {
-      title: "AI Content Ops System",
-      desc: "Brief → outline → draft → review checklist → publish, with versioned Notion workflows.",
-      tags: ["Notion", "Workflow", "SEO"],
+      title: "AI Project - Ducati spot",
+      desc: "An Immaginary Ducati Spot built only using AI",
+      tags: ["Images", "Videos", "AI"],
       bullets: [
-        "Standardized briefs and reduced revision loops.",
-        "Reusable templates + tone guardrails.",
-        "Pluggable research + citations step (placeholder).",
+        "All images are built with ai.",
+        "Images are animated with ai",
+        "Voice & Music generated with ai",
+        "Produced in less than 2 days"
       ],
+      videoUrl: "https://www.youtube.com/embed/aoxW4ncC88w",
+      linkLabel: "Watch",
     },
     {
-      title: "Internal Knowledge Bot",
-      desc: "RAG-style assistant that answers questions from docs with sources (placeholder).",
-      tags: ["RAG", "Docs", "Search"],
+      title: "My Behance Profile",
+      desc: "Just my Behance profile where i post graphic design jobs.",
+      tags: ["Graphic Design", "Branding"],
       bullets: [
-        "Improved discovery of SOPs and policies.",
-        "Permission-aware access layer (placeholder).",
-        "Citations for accountability.",
+        "Modern and clean designs",
+        "Rebranding of famous brands.",
+        "More to come.",
       ],
+      url: "https://www.behance.net/stellatielia",
+      linkLabel: "View Profile",
     },
   ];
 
@@ -494,7 +512,7 @@ const [isLoading, setIsLoading] = useState(false);
     {
       role: "AI Automation Specialist",
       company: "Freelance / Agency",
-      time: "2023 — Present",
+      time: "2025 — Present",
       bullets: [
         "Built end-to-end automations that connect CRM, email, docs, and internal tools.",
         "Designed “human-in-the-loop” flows to keep quality high while scaling output.",
@@ -502,13 +520,13 @@ const [isLoading, setIsLoading] = useState(false);
       ],
     },
     {
-      role: "Ops & Systems Builder",
-      company: "Startup Team",
-      time: "2021 — 2023",
+      role: "Graphic Designer and Web Developer",
+      company: "Freelancer",
+      time: "2021 — 2026",
       bullets: [
-        "Implemented lightweight analytics + reporting loops for leadership.",
-        "Reduced tool sprawl by standardizing on a single source of truth.",
-        "Created onboarding SOPs and training docs for non-technical teams.",
+        "Worked in Startups and SMEs to create modern brand identities.",
+        "Developed websites for companies and minting platforms.",
+        "Always learning about new trends and technologies.",
       ],
     },
   ];
@@ -950,7 +968,11 @@ const [isLoading, setIsLoading] = useState(false);
             >
               <div className="grid gap-6 lg:grid-cols-3">
                 {projects.map((p) => (
-                  <ProjectCard key={p.title} {...p} />
+                  <ProjectCard
+                    key={p.title}
+                    {...p}
+                    onVideoClick={p.videoUrl ? () => setVideoModal(p) : undefined}
+                  />
                 ))}
               </div>
             </Section>
@@ -1325,6 +1347,28 @@ const [isLoading, setIsLoading] = useState(false);
     </div>
   )}
 </Modal>
+
+      {/* Video modal */}
+      <Modal
+        open={!!videoModal}
+        title={videoModal?.title}
+        onClose={() => setVideoModal(null)}
+      >
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+          {videoModal?.videoUrl && (
+            <iframe
+              src={videoModal.videoUrl}
+              title={videoModal.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full"
+            />
+          )}
+        </div>
+        {videoModal?.desc && (
+          <p className="mt-4 text-sm text-white/70">{videoModal.desc}</p>
+        )}
+      </Modal>
 
       {/* Small global styles */}
       <style>{`
