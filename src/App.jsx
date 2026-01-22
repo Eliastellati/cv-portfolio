@@ -522,7 +522,7 @@ const [isLoading, setIsLoading] = useState(false);
 
   setIsLoading(true);
 
-  // Per GDPR Assistant, usa l'API vera
+  // ===== GDPR ASSISTANT - API VERA =====
   if (toolModal?.id === "gdpr-assistant") {
     try {
       const res = await fetch("/api/gdpr-chat", {
@@ -550,23 +550,49 @@ const [isLoading, setIsLoading] = useState(false);
     return;
   }
 
-  // Per gli altri tools (Lead Scorer, Content Brief) - mantieni fake
-  await new Promise((r) => setTimeout(r, 800));
-
+  // ===== LEAD SCORER - API VERA =====
   if (toolModal?.id === "lead-scorer") {
-    setToolOutput(
-      JSON.stringify(
-        { score: 87, reason: "Hot lead. Ready to engage." },
-        null,
-        2
-      )
-    );
-  } else if (toolModal?.id === "content-brief") {
-    setToolOutput(
-      `# Content Brief\n\n## Topic\n${trimmed}\n\n## Outline\n- Section 1\n- Section 2`
-    );
+    try {
+      const res = await fetch("/api/lead-qualifier", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: trimmed }),
+      });
+
+      const data = await res.json();
+      setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
+    } catch (e) {
+      console.error("Lead Scorer Error:", e);
+      setToolOutput("❌ Connection error: " + String(e));
+    } finally {
+      setIsLoading(false);
+    }
+    return;
   }
 
+  // ===== CONTENT BRIEF - API VERA =====
+  if (toolModal?.id === "content-brief") {
+    try {
+      const res = await fetch("/api/content-brief", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: trimmed }),
+      });
+
+      const data = await res.json();
+      setToolOutput(data?.text ?? JSON.stringify(data, null, 2));
+    } catch (e) {
+      console.error("Content Brief Error:", e);
+      setToolOutput("❌ Connection error: " + String(e));
+    } finally {
+      setIsLoading(false);
+    }
+    return;
+  }
+
+  // ===== FALLBACK (altri tools futuri) =====
+  await new Promise((r) => setTimeout(r, 800));
+  setToolOutput("Tool not configured yet.");
   setIsLoading(false);
 };
 
