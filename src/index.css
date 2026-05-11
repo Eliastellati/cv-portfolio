@@ -1,97 +1,52 @@
-
-
-
-
-
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
-
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ✅ Global fix for Vite template leftovers */
-html, body, #root {
-  height: 100%;
-  width: 100%;
+:root {
+  --bg: #f4efe9;
+  --surface: #fffaf5;
+  --ink: #153727;
+  --accent: #0d5a3a;
+  --muted: #6e6b66;
 }
 
+* { box-sizing: border-box; }
 body {
   margin: 0;
-  background: #0b0d10; /* stesso bg del sito */
-  overflow-x: hidden;  /* evita spostamenti laterali */
+  background: radial-gradient(circle at top, #f8f5f1 0%, var(--bg) 45%, #efe6dc 100%);
+  color: var(--ink);
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-#root {
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
+h1,h2,h3,.eyebrow { font-family: 'Cormorant Garamond', Georgia, serif; }
+h1 { font-size: clamp(2.4rem, 7vw, 5rem); margin: 0.3rem 0; }
+h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0; }
+.section { width: min(1100px, 92vw); margin: 0 auto; padding: 3.5rem 0; }
+.page { min-height: 100vh; }
+.hero { text-align: center; padding-top: 4.5rem; }
+.hero-logo { width: min(220px, 55vw); margin: 0 auto 1rem; }
+.lead, .section-description { color: var(--muted); max-width: 650px; line-height: 1.7; }
+.lead { margin: 0 auto; }
+.eyebrow { letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 0; }
+.hero-actions { margin-top: 1.75rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn { border-radius: 999px; padding: .82rem 1.3rem; font-weight: 600; text-decoration: none; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-secondary { background: #fff; color: var(--accent); border: 1px solid #cde0d6; }
+
+.card { background: var(--surface); border-radius: 1.1rem; padding: 1.2rem; box-shadow: 0 8px 25px rgba(38, 26, 15, 0.08); }
+.menu-grid,.contact-grid,.reviews-grid { display: grid; gap: 1rem; }
+.menu-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.menu-card ul,.hours-list,.contact-list { list-style: none; margin: 0; padding: 0; }
+.menu-card li,.hours-list li { display: flex; justify-content: space-between; gap: 1rem; padding: .45rem 0; border-bottom: 1px dashed #e6ded3; }
+.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .9rem; }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; border-radius: .9rem; aspect-ratio: 4/5; }
+.contact-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.map-placeholder { margin-top: 1rem; border: 1px dashed #c4b8aa; border-radius: .75rem; padding: 1rem; color: var(--muted); }
+.reviews-grid blockquote { margin: 0; font-style: italic; color: #2f4f3e; }
+.footer { border-top: 1px solid #decebe; width: min(1100px, 92vw); margin: 2rem auto 0; padding: 1.6rem 0 2.2rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.socials { display: flex; gap: .85rem; }
+.socials a, .contact-list a { color: var(--accent); }
+
+@media (min-width: 840px){
+  .gallery-grid { grid-template-columns: repeat(5, 1fr); }
 }
